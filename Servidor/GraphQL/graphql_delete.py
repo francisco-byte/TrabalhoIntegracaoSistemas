@@ -4,9 +4,8 @@ from strawberry.fastapi import GraphQLRouter
 import json
 import os
 
-# Caminho para o arquivo 'produtos.json' dentro da pasta 'shared'
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Caminho da pasta onde o script está
-SHARED_DIR = os.path.join(BASE_DIR, '..', 'shared')  # Pasta 'shared'
+# Caminho absoluto para o arquivo 'produtos.json' na pasta 'shared'
+SHARED_DIR = '/shared'  # Diretório compartilhado mapeado no contêiner
 DATA_FILE = os.path.join(SHARED_DIR, 'produtos.json')
 
 def carregar_dados():
