@@ -1,5 +1,13 @@
-requests           # Para consumir a API REST
-zeep               # Para consumir o serviço SOAP
-graphqlclient      # Para consumir o serviço GraphQL
-grpcio             # Para consumir o serviço gRPC
-grpcio-tools       # Para gerar o código gRPC a partir do arquivo .proto
+requests
+jsonschema
+jsonpath-ng
+flask
+flask-restful
+flask-graphql
+xmlschema
+grpcio
+grpcio-tools
+graphene
+protobuf
+setuptools
+tk

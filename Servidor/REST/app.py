@@ -1,9 +1,13 @@
-from flask import Flask, jsonify
+from flask import Flask, request, jsonify
 import json
 import os
 
 app = Flask(__name__)
-DATA_FILE = '/shared/produtos.json'
+
+# Caminho para o arquivo 'produtos.json' na pasta 'shared'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Caminho da pasta onde o script está
+SHARED_DIR = os.path.join(BASE_DIR, '..', 'shared')  # Pasta 'shared'
+DATA_FILE = os.path.join(SHARED_DIR, 'produtos.json')
 
 def carregar_dados():
     if os.path.exists(DATA_FILE):
@@ -15,14 +19,18 @@ def salvar_dados(dados):
     with open(DATA_FILE, 'w') as f:
         json.dump(dados, f, indent=2)
 
-@app.route('/produtos/<int:produto_id>', methods=['DELETE'])
-def deletar_produto(produto_id):
+@app.route('/create', methods=['POST'])
+def create_produto():
+    produto = request.json
     produtos = carregar_dados()
-    novos_produtos = [p for p in produtos if p["id"] != produto_id]
-    if len(novos_produtos) == len(produtos):
-        return jsonify({"error": "Produto não encontrado"}), 404
-    salvar_dados(novos_produtos)
-    return jsonify({"message": f"Produto {produto_id} deletado com sucesso"}), 200
+
+    # Evita produtos com o mesmo ID
+    if any(p['id'] == produto['id'] for p in produtos):
+        return jsonify({'erro': 'ID já existente'}), 400
+
+    produtos.append(produto)
+    salvar_dados(produtos)
+    return jsonify({'mensagem': f"Produto {produto['name']} criado com sucesso!"})
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5001)
+    app.run(port=8001)

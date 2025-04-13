@@ -1,10 +1,13 @@
-from spyne import Application, rpc, ServiceBase, Integer, Unicode, Decimal
+from spyne import Application, rpc, ServiceBase, Unicode
 from spyne.protocol.soap import Soap11
-from lxml import etree
+from spyne.server.wsgi import WsgiApplication
 import json
 import os
 
-DATA_FILE = '/shared/produtos.json'
+# Caminho para o arquivo 'produtos.json' na pasta 'shared'
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))  # Caminho da pasta onde o script está
+SHARED_DIR = os.path.join(BASE_DIR, '..', 'shared')  # Pasta 'shared'
+DATA_FILE = os.path.join(SHARED_DIR, 'produtos.json')
 
 def carregar_dados():
     if os.path.exists(DATA_FILE):
@@ -12,53 +15,22 @@ def carregar_dados():
             return json.load(f)
     return []
 
-def salvar_dados(dados):
-    with open(DATA_FILE, 'w') as f:
-        json.dump(dados, f, indent=2)
-
-class ProdutoService(ServiceBase):
-    @rpc(Unicode, Integer, Decimal, Integer, _out_variable_name="produto", _returns=Unicode)
-    def create_produto(ctx, name, id, price, stock):
-        # Validar XML contra o XSD
-        produto_xml = f"""
-        <produto>
-            <id>{id}</id>
-            <name>{name}</name>
-            <price>{price}</price>
-            <stock>{stock}</stock>
-        </produto>
-        """
-        
-        with open('./servidor/soap/schema.xsd', 'r') as f:
-            xsd_content = f.read()
-        xsd_schema = etree.XMLSchema(etree.fromstring(xsd_content))
-        xml_doc = etree.fromstring(produto_xml)
-        
-        try:
-            xsd_schema.assertValid(xml_doc)
-        except etree.DocumentInvalid as e:
-            return f"Erro na validação XSD: {str(e)}"
-
-        produto = {
-            'id': id,
-            'name': name,
-            'price': price,
-            'stock': stock
-        }
+class ProdutoReadService(ServiceBase):
+    @rpc(_returns=Unicode)
+    def read_all(ctx):  # Mudado de 'read_produtos' para 'read_all'
         produtos = carregar_dados()
-        produtos.append(produto)
-        salvar_dados(produtos)
-        
-        return f"Produto {name} com ID {id} criado com sucesso!"
+        return json.dumps(produtos)
 
-application = Application(
-    [ProdutoService],
-    tns='spyne.examples.produto',
+application = Application([ProdutoReadService],
+    tns='spyne.examples.readproduto',
     in_protocol=Soap11(),
     out_protocol=Soap11(),
 )
 
+wsgi_app = WsgiApplication(application)
+
 if __name__ == '__main__':
     from wsgiref.simple_server import make_server
-    server = make_server('0.0.0.0', 8002, application)
+    server = make_server('0.0.0.0', 8002, wsgi_app)
+    print("SOAP server online em http://localhost:8002")
     server.serve_forever()
