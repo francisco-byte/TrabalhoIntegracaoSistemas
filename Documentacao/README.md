@@ -260,6 +260,6 @@ services:
 
 ## 👤 Autor
 
-Projeto desenvolvido por **Francisco Carvalho dos Reis**, no contexto da disciplina de **Integração de Sistemas**.
+Projeto desenvolvido por **Francisco Carvalho dos Reis**, no contexto da disciplina de **Integração de Sistemas** do Instituto Politécnico de Santarém.
 
 ---
