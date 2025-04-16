@@ -1,7 +1,8 @@
+# 🧠 Projeto: Sistema Cliente-Servidor para Gestão de Produtos com Múltiplas APIs e Interface Gráfica
 
-# 🧠 Projeto: Sistema Cliente-Servidor com Múltiplas APIs e Interface Gráfica
+Este projeto consiste numa aplicação cliente-servidor desenvolvida em Python que permite gerir uma lista de produtos. A aplicação oferece funcionalidades para **visualizar, adicionar, remover e atualizar produtos**, sendo que cada produto possui um **ID, nome, preço e quantidade em stock**.
 
-Este projeto consiste numa aplicação cliente-servidor desenvolvida em Python que utiliza diversas tecnologias para comunicação entre o cliente e o servidor, incluindo REST, SOAP, gRPC e GraphQL. O cliente oferece uma interface gráfica desenvolvida com Tkinter.
+O servidor disponibiliza diferentes formas de acesso aos dados através de múltiplas tecnologias: **REST, SOAP, gRPC e GraphQL**. O cliente comunica com o servidor através de uma **interface gráfica desenvolvida em Tkinter**, permitindo ao utilizador escolher o tipo de serviço a utilizar para realizar as operações CRUD (Create, Read, Update, Delete).
 
 ---
 
@@ -11,29 +12,36 @@ Este projeto consiste numa aplicação cliente-servidor desenvolvida em Python q
 .
 ├── cliente/                   # Interface gráfica Tkinter
 │   ├── cliente.py
-│   └── ...
+│   ├── produtos_pb2_grpc.py   # Define os serviços
+│   └── produtos_pb2.py        # Define os produtos
+|
 ├── servidor/                 # Implementação dos serviços
-│   ├── app_rest/
-│   │   └── main.py           # API REST (FastAPI)
-│   ├── app_soap/
-│   │   └── soap_server.py    # API SOAP
-│   ├── app_grpc/
-│   │   ├── server_grpc.py    # Servidor gRPC
-│   │   └── mensagens.proto   # Definição protobuf
-│   ├── app_graphql/
-│   │   └── graphql_server.py # API GraphQL
-│   └── db/
-│       └── database.py       # Simulação de base de dados
-├── documentacao/             # Documentação adicional (descrição dos serviços, exemplos Postman, etc)
-│   ├── exemplos_postman.json
-│   ├── descricoes_servicos.md
-│   └── ...
-├── docker-compose.yml        # Orquestração dos serviços
-├── Dockerfile.rest           # Dockerfile para serviço REST
-├── Dockerfile.soap           # Dockerfile para serviço SOAP
-├── Dockerfile.grpc           # Dockerfile para serviço gRPC
-├── Dockerfile.graphql        # Dockerfile para serviço GraphQL
-└── README.md                 # Este ficheiro
+│   ├── rest/
+│   │   ├── app.py             # API REST
+│   │   ├── Dockerfile.rest    
+│   │   └── requirements.txt
+│   ├── soap/
+│   │   ├── app.py             # API SOAP
+│   │   ├── Dockerfile.soap    
+│   │   ├── schema.xsd         
+│   │   └── requirements.txt
+│   ├── grpc/
+│   │   ├── app.py             # Servidor gRPC
+│   │   ├── produtos.proto     
+│   │   ├── produtos_pb2_grpc.py
+│   │   ├── produtos_pb2.py
+│   │   ├── Dockerfile.grpc    
+│   │   └── requirements.txt
+│   ├── graphql/
+│   │   ├── graphql_delete.py  # API GraphQL
+│   │   ├── Dockerfile.graphql 
+│   │   └── requirements.txt
+│   └── shared/
+│       ├── produtos.json      # Dados persistentes
+│       └── schema.json
+├── documentacao/
+│   └── README.md              # Este ficheiro
+└── docker-compose.yml         # Orquestração dos serviços
 ```
 
 ---
@@ -42,44 +50,50 @@ Este projeto consiste numa aplicação cliente-servidor desenvolvida em Python q
 
 - Python 3.10+
 - FastAPI (REST)
-- Zeep / Spyne (SOAP)
-- gRPC + Protobuf
-- Graphene / Ariadne (GraphQL)
+- Uvicorn (ASGI)
+- Flask (REST)
+- Spyne (SOAP)
+- gRPC + Protobuf (RPC)
+- Strawberry (GraphQL)
 - Tkinter (GUI)
-- SQLite / JSON (dados persistentes)
+- JSON (Persistência)
 - Docker & Docker Compose
 
 ---
 
 ## ⚙️ Como Correr o Projeto
 
-### Pré-requisitos
+### 🔧 Pré-requisitos
 
-- Docker instalado
-- Python (opcionalmente, se quiser executar manualmente)
+- Docker
+- Python 3.10+
 
-### Com Docker
+### ▶️ Com Docker
 
 ```bash
 docker-compose up --build
 ```
 
-### Manualmente
+### 🧪 Manualmente
 
-#### 1. Servidor
+#### 1. Servidores
 
 ```bash
-cd servidor/app_rest
-uvicorn main:app --reload --port 8000
+# REST
+cd servidor/rest
+python app.py
 
-cd servidor/app_soap
-python soap_server.py
+# SOAP
+cd servidor/soap
+python app.py
 
-cd servidor/app_grpc
-python server_grpc.py
+# gRPC
+cd servidor/grpc
+python app.py
 
-cd servidor/app_graphql
-python graphql_server.py
+# GraphQL
+cd servidor/graphql
+python graphql_delete.py
 ```
 
 #### 2. Cliente
@@ -91,96 +105,161 @@ python cliente.py
 
 ---
 
-## 📡 Funcionalidades
+## 📡 Funcionalidades por API
 
-| Tecnologia | Tipo de API | CRUD |
-|------------|-------------|------|
-| REST       | HTTP (JSON) | Sim |
-| SOAP       | XML         | Sim |
-| gRPC       | Protobuf    | Sim |
-| GraphQL    | Query/Mut.  | Sim |
-
-O cliente Tkinter permite ao utilizador interagir com todas as APIs disponíveis.
+| Tecnologia | Tipo de API | Operação  |
+|------------|-------------|-----------|
+| REST       | HTTP (JSON) | **Criar** |
+| SOAP       | XML (WSDL)  | **Ler**   |
+| gRPC       | Protobuf    | **Atualizar** |
+| GraphQL    | Query/Mutation | **Remover** |
 
 ---
 
-## 📚 Documentação dos Endpoints/Serviços
+## 📚 Detalhes dos Endpoints
 
-A documentação completa dos serviços e exemplos de chamadas está disponível em:
+### 🟩 REST - Criar Produto
 
-```
-/documentacao/descricoes_servicos.md
-/documentacao/exemplos_postman.json
-```
-
-- REST: Acesso via `http://localhost:8000/docs` (Swagger)
-- SOAP: Exemplos em XML e ficheiro Postman incluídos
-- gRPC: Chamadas via script cliente gRPC incluído
-- GraphQL: Interface gráfica via `http://localhost:8002/graphql`
+- **URL**: `http://localhost:8001/create`
+- **Método**: `POST`
+- **Body**:
+  ```json
+  {
+    "id": 1,
+    "name": "Produto Exemplo",
+    "price": 20.5,
+    "stock": 100
+  }
+  ```
+- **Resposta**:
+  ```json
+  {
+    "mensagem": "Produto Produto Exemplo criado com sucesso!"
+  }
+  ```
 
 ---
 
-## 📦 Docker Compose Detalhes
+### 🟦 SOAP - Listar Todos os Produtos
+
+- **URL**: `http://localhost:8002/?wsdl`
+- **Operação**: `read_all()`
+- **Resposta**: JSON como string:
+  ```json
+  [
+    {
+      "id": 1,
+      "name": "Produto Exemplo",
+      "price": 20.5,
+      "stock": 100
+    }
+  ]
+  ```
+
+---
+
+### 🟨 gRPC - Atualizar Produto
+
+- **Host**: `localhost:8003`
+- **Serviço**: `UpdateProduto`
+- **Protobuf**:
+  ```proto
+  message Produto {
+      int32 id = 1;
+      string name = 2;
+      double price = 3;
+      int32 stock = 4;
+  }
+
+  message Resposta {
+      string mensagem = 1;
+  }
+
+  service ProdutoService {
+      rpc UpdateProduto(Produto) returns (Resposta);
+  }
+  ```
+- **Exemplo de uso em Python**:
+  ```python
+  produto = produtos_pb2.Produto(id=1, name="Atualizado", price=99.0, stock=10)
+  resposta = stub.UpdateProduto(produto)
+  print(resposta.mensagem)
+  ```
+
+---
+
+### 🟥 GraphQL - Remover Produto
+
+- **URL**: `http://localhost:8004/graphql`
+- **Mutation**:
+  ```graphql
+  mutation {
+    deleteProduto(id: 1)
+  }
+  ```
+- **Resposta**:
+  ```json
+  {
+    "data": {
+      "deleteProduto": "Produto com ID 1 removido com sucesso."
+    }
+  }
+  ```
+
+---
+
+## 🖥️ Cliente Tkinter
+
+Interface gráfica desenvolvida em `Tkinter` que permite utilizar as 4 APIs com os seguintes botões:
+
+| Ação             | Tecnologia | Função Tkinter              |
+|------------------|------------|-----------------------------|
+| Criar Produto    | REST       | `criar_produto_rest()`      |
+| Mostrar Produtos | SOAP       | `listar_produtos_soap()`    |
+| Atualizar Produto| gRPC       | `atualizar_produto_grpc()`  |
+| Remover Produto  | GraphQL    | `remover_produto_graphql()` |
+
+---
+
+## 📦 Docker Compose
 
 ```yaml
 services:
   rest:
-    build:
-      context: .
-      dockerfile: Dockerfile.rest
-    ports:
-      - "8000:8000"
-  soap:
-    build:
-      context: .
-      dockerfile: Dockerfile.soap
+    build: ./Servidor/REST
     ports:
       - "8001:8001"
-  grpc:
-    build:
-      context: .
-      dockerfile: Dockerfile.grpc
-    ports:
-      - "50051:50051"
-  graphql:
-    build:
-      context: .
-      dockerfile: Dockerfile.graphql
+    volumes:
+      - ./Servidor/shared:/shared  
+  soap:
+    build: ./Servidor/SOAP
     ports:
       - "8002:8002"
+    volumes:
+      - ./Servidor/shared:/shared  
+  graphql:
+    build: ./Servidor/GraphQL
+    ports:
+      - "8004:8004"
+    volumes:
+      - ./Servidor/shared:/shared  
+  grpc:
+    build: ./Servidor/GRPC
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./Servidor/shared:/shared  
+  shared:
+    image: alpine
+    volumes:
+      - ./Servidor/shared:/shared
+    command: tail -f /dev/null
 ```
-
----
-
-## 📝 Entrega
-
-### Repositório GitHub com:
-
-- [x] Código fonte do servidor e cliente (bem estruturado e documentado)
-- [x] Dockerfiles e docker-compose.yml
-- [x] Documentação completa:
-  - [x] Descrição detalhada dos endpoints/serviços
-  - [x] README.md com instruções claras de execução
-  - [x] Exemplos de chamadas Postman
-  - [x] Esquemas de validação (nos ficheiros da pasta /documentacao)
-  - [ ] Vídeo de demonstração (até 8 minutos)
-
-### Estrutura sugerida:
-
-```
-/servidor
-/cliente
-/documentacao
-docker-compose.yml
-```
-
-### Acesso ao Repositório GitHub:
-
-- Adicionar o professor como colaborador com permissões de leitura.
-- Realizar commits frequentes com mensagens claras.
 
 ---
 
 ## 👤 Autor
 
-Projeto desenvolvido por [Teu Nome Aqui], no contexto da disciplina de Integração de Sistemas.
+Projeto desenvolvido por **Francisco Carvalho dos Reis**, no contexto da disciplina de **Integração de Sistemas**.
+
+---
