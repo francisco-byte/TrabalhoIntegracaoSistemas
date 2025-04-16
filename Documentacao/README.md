@@ -1,7 +1,10 @@
 
-# 🧠 Projeto: Sistema Cliente-Servidor com Múltiplas APIs e Interface Gráfica
+# 🧠 Projeto: Sistema Cliente-Servidor para Gestão de Produtos com Múltiplas APIs e Interface Gráfica
 
-Este projeto consiste numa aplicação cliente-servidor desenvolvida em Python que utiliza diversas tecnologias para comunicação entre o cliente e o servidor, incluindo REST, SOAP, gRPC e GraphQL. O cliente oferece uma interface gráfica desenvolvida com Tkinter.
+Este projeto consiste numa aplicação cliente-servidor desenvolvida em Python que permite gerir uma lista de produtos. A aplicação oferece funcionalidades para **visualizar, adicionar, remover e atualizar produtos**, sendo que cada produto possui um **ID, nome, preço e quantidade em stock**.
+
+O servidor disponibiliza diferentes formas de acesso aos dados através de múltiplas tecnologias: **REST, SOAP, gRPC e GraphQL**. O cliente comunica com o servidor através de uma **interface gráfica desenvolvida em Tkinter**, permitindo ao utilizador escolher o tipo de serviço a utilizar para realizar as operações CRUD (Create, Read, Update, Delete).
+
 
 ---
 
@@ -11,43 +14,60 @@ Este projeto consiste numa aplicação cliente-servidor desenvolvida em Python q
 .
 ├── cliente/                   # Interface gráfica Tkinter
 │   ├── cliente.py
-│   └── ...
+│   ├── produtos_pb2_grpc.py   # Define os serviços
+│   └── produtos_pb2.py        # Define os produtos
+|
 ├── servidor/                 # Implementação dos serviços
 │   ├── app_rest/
-│   │   └── main.py           # API REST (FastAPI)
+│   │   ├── app.py           # API REST (FastAPI)
+│   │   ├── Dockerfile.rest   # Dockerfile para serviço REST 
+│   │   └── requirements.txt
 │   ├── app_soap/
-│   │   └── soap_server.py    # API SOAP
+│   │   ├── app.py    # API SOAP
+│   │   ├── Dockerfile.soap   # Dockerfile para serviço SOAP
+│   │   └── requirements.txt
 │   ├── app_grpc/
-│   │   ├── server_grpc.py    # Servidor gRPC
-│   │   └── mensagens.proto   # Definição protobuf
+│   │   ├── app.py    # Servidor gRPC
+│   │   ├── produtos.proto    # Definição protobuf
+│   │   ├── produtos_pb2_grpc.py   # Define os serviços
+│   │   ├── produtos_pb2.py        # Define os produtos
+│   │   ├── Dockerfile.grpc   # Dockerfile para serviço gRPC
+│   │   └── requirements.txt
 │   ├── app_graphql/
-│   │   └── graphql_server.py # API GraphQL
-│   └── db/
-│       └── database.py       # Simulação de base de dados
+│   │   ├── graphql_delete.py # API GraphQL
+│   │   ├── Dockerfile.graphql # Dockerfile para serviço GraphQL
+│   │   └── requirements.txt
+│   └── shared/
+│       ├── produtos.json     # JSON onde são guardados os produtos
+|       └── schema.json       # Define a estrutura dos produtos
 ├── documentacao/             # Documentação adicional (descrição dos serviços, exemplos Postman, etc)
-│   ├── exemplos_postman.json
-│   ├── descricoes_servicos.md
-│   └── ...
-├── docker-compose.yml        # Orquestração dos serviços
-├── Dockerfile.rest           # Dockerfile para serviço REST
-├── Dockerfile.soap           # Dockerfile para serviço SOAP
-├── Dockerfile.grpc           # Dockerfile para serviço gRPC
-├── Dockerfile.graphql        # Dockerfile para serviço GraphQL
-└── README.md                 # Este ficheiro
+│   └── README.md             # Este ficheiro
+└── docker-compose.yml        # Orquestração dos serviços
+
 ```
 
 ---
 
-## 🚀 Tecnologias Utilizadas
+🚀 Tecnologias Utilizadas
+Python 3.10+
 
-- Python 3.10+
-- FastAPI (REST)
-- Zeep / Spyne (SOAP)
-- gRPC + Protobuf
-- Graphene / Ariadne (GraphQL)
-- Tkinter (GUI)
-- SQLite / JSON (dados persistentes)
-- Docker & Docker Compose
+FastAPI (REST)
+
+Uvicorn (Servidor ASGI para FastAPI)
+
+Strawberry-GraphQL (GraphQL)
+
+gRPC + Protobuf (RPC)
+
+Tkinter (Interface Gráfica - GUI)
+
+JSON (Persistência de dados)
+
+Docker & Docker Compose (Contéineres e Organização dos serviços)
+
+Flask (Usado em REST)
+
+Spyne (SOAP)
 
 ---
 
@@ -93,12 +113,12 @@ python cliente.py
 
 ## 📡 Funcionalidades
 
-| Tecnologia | Tipo de API | CRUD |
-|------------|-------------|------|
-| REST       | HTTP (JSON) | Sim |
-| SOAP       | XML         | Sim |
-| gRPC       | Protobuf    | Sim |
-| GraphQL    | Query/Mut.  | Sim |
+| Tecnologia | Tipo de API |    CRUD   |
+|------------|-------------|-----------|
+| REST       | HTTP (JSON) | Create    |
+| SOAP       | XML         | Listar    |
+| gRPC       | Protobuf    | Atualizar |
+| GraphQL    | Query/Mut.  | Remover   |
 
 O cliente Tkinter permite ao utilizador interagir com todas as APIs disponíveis.
 
@@ -125,62 +145,40 @@ A documentação completa dos serviços e exemplos de chamadas está disponível
 ```yaml
 services:
   rest:
-    build:
-      context: .
-      dockerfile: Dockerfile.rest
-    ports:
-      - "8000:8000"
-  soap:
-    build:
-      context: .
-      dockerfile: Dockerfile.soap
+    build: ./Servidor/REST
     ports:
       - "8001:8001"
-  grpc:
-    build:
-      context: .
-      dockerfile: Dockerfile.grpc
-    ports:
-      - "50051:50051"
-  graphql:
-    build:
-      context: .
-      dockerfile: Dockerfile.graphql
+    volumes:
+      - ./Servidor/shared:/shared  
+  soap:
+    build: ./Servidor/SOAP
     ports:
       - "8002:8002"
+    volumes:
+      - ./Servidor/shared:/shared  
+  graphql:
+    build: ./Servidor/GraphQL
+    ports:
+      - "8004:8004"
+    volumes:
+      - ./Servidor/shared:/shared  
+  grpc:
+    build: ./Servidor/GRPC
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./Servidor/shared:/shared  
+  shared:
+    image: alpine
+    volumes:
+      - ./Servidor/shared:/shared
+    command: tail -f /dev/null
+
 ```
 
 ---
 
-## 📝 Entrega
-
-### Repositório GitHub com:
-
-- [x] Código fonte do servidor e cliente (bem estruturado e documentado)
-- [x] Dockerfiles e docker-compose.yml
-- [x] Documentação completa:
-  - [x] Descrição detalhada dos endpoints/serviços
-  - [x] README.md com instruções claras de execução
-  - [x] Exemplos de chamadas Postman
-  - [x] Esquemas de validação (nos ficheiros da pasta /documentacao)
-  - [ ] Vídeo de demonstração (até 8 minutos)
-
-### Estrutura sugerida:
-
-```
-/servidor
-/cliente
-/documentacao
-docker-compose.yml
-```
-
-### Acesso ao Repositório GitHub:
-
-- Adicionar o professor como colaborador com permissões de leitura.
-- Realizar commits frequentes com mensagens claras.
-
----
 
 ## 👤 Autor
 
-Projeto desenvolvido por [Teu Nome Aqui], no contexto da disciplina de Integração de Sistemas.
+Projeto desenvolvido por Francisco Carvalho dos Reis, no contexto da disciplina de Integração de Sistemas.
