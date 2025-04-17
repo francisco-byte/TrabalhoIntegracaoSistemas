@@ -256,6 +256,11 @@ services:
     command: tail -f /dev/null
 ```
 
+
+🎥 Demonstração em Vídeo
+Dentro da pasta documentacao/ encontra-se um vídeo demonstrativo que mostra o funcionamento completo da aplicação, incluindo a interação com todas as APIs através da interface gráfica.
+
+
 ---
 
 ## 👤 Autor
