@@ -109,10 +109,10 @@ python cliente.py
 
 | Tecnologia | Tipo de API | Operação  |
 |------------|-------------|-----------|
-| REST       | HTTP (JSON) | **Criar** |
-| SOAP       | XML (WSDL)  | **Ler**   |
-| gRPC       | Protobuf    | **Atualizar** |
-| GraphQL    | Query/Mutation | **Remover** |
+| REST       | HTTP (JSON) | **Create Produto** |
+| SOAP       | XML (WSDL)  | **Read Produto**   |
+| gRPC       | Protobuf    | **Update Produto** |
+| GraphQL    | Query/Mutation | **Remove Produto** |
 
 ---
 
@@ -260,6 +260,6 @@ services:
 
 ## 👤 Autor
 
-Projeto desenvolvido por **Francisco Carvalho dos Reis**, no contexto da disciplina de **Integração de Sistemas**.
+Projeto desenvolvido por **Francisco Carvalho dos Reis**, no contexto da disciplina de **Integração de Sistemas** do Instituto Politécnico de Santarém.
 
 ---
